@@ -34,13 +34,39 @@
 (setq use-package-always-ensure t)
 
 (use-package evil
-  :config
+  :init
   (evil-mode 1))
 
 (use-package swiper
   :ensure t)
 
+(use-package magit
+  :commands (magit-status magit-get-current-branch)
+  :custom
+  (magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
 
+(use-package evil-magit
+  :after magit)
+
+
+(use-package erc
+  :commands erc
+  :config
+  (setq
+   erc-nick "keyboard-slayer"
+   erc-auto-query 'bury
+   erc-join-buffer 'burry
+   erc-rename-buffers t
+   erc-lurker-hide-list '("JOIN" "PART" "QUIT")
+   erc-track-exclude-types '("JOIN" "NICK" "QUIT" "MODE")
+   erc-track-enable-keybindings nil
+   erc-track-visibility nil 
+   erc-fill-column 80
+   erc-fill-function 'erc-fill-static
+   erc-fill-static-center 20
+   erc-autojoin-channels-alist '(("freenode.net" "#cpcshell" "#devse"))))
+
+     
 (use-package ivy
   :diminish
   :bind (("C-s" . swiper)
@@ -136,6 +162,16 @@
 
 (use-package counsel-projectile
   :config (counsel-projectile-mode))
+
+(use-package evil-org
+  :after org
+  :config
+  (add-hook 'org-mode-hook 'evil-org-mode)
+  (add-hook 'evil-org-mode-hook
+	    (lambda ()
+            (evil-org-set-key-theme)))
+  (require 'evil-org-agenda)
+  (evil-org-agenda-set-keys))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
