@@ -104,17 +104,6 @@
 (setq org-src-preserve-indentation t)
 (setq org-startup-folded t)
 #+END_SRC
-* Haskell
-** Mode
-#+BEGIN_SRC emacs-lisp
-(use-package haskell-mode
-  :ensure t
-  :config
-  (require 'haskell-interactive-mode)
-  (require 'haskell-process)
-  (add-hook 'haskell-mode-hook 'interactive-haskell-mode))
-#+END_SRC
-
 * Ranger
 #+BEGIN_SRC emacs-lisp
 (use-package ranger
@@ -173,3 +162,56 @@
     (setq doom-modeline-lsp t))
 #+END_SRC
 
+* Programming
+** Autocomplete
+#+BEGIN_SRC emacs-lisp
+(use-package auto-complete
+    :ensure t
+    :after (go-autocomplete)
+    :config
+    (require 'go-autocomplete)
+    (ac-config-default))
+#+END_SRC
+** LSP
+#+BEGIN_SRC emacs-lisp
+(use-package lsp-mode
+    :ensure t
+    :init
+    (setq lsp-keymap-prefix "C-c l")
+    :hook
+    (python-mode . lsp)
+    (c-mode . lsp)
+    (go-mode . lsp))
+    
+(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
+(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+#+END_SRC
+** Haskell
+*** Mode
+#+BEGIN_SRC emacs-lisp
+(use-package haskell-mode
+  :ensure t
+  :config
+  (require 'haskell-interactive-mode)
+  (require 'haskell-process)
+  (add-hook 'haskell-mode-hook 'interactive-haskell-mode))
+#+END_SRC
+** C/C++
+#+BEGIN_SRC emacs-lisp
+;; Don't forget to install it with your package manager
+(use-package ccls
+    :ensure t
+    :init
+    (setq ccls-executable "/usr/bin/ccls"))
+#+END_SRC
+
+** Go
+#+BEGIN_SRC emacs-lisp
+(setenv "GOPATH" (concat "/home/" (getenv "USER") "/go"))
+
+(use-package go-mode
+    :ensure t)
+
+(use-package go-autocomplete
+    :ensure t)
+#+END_SRC
