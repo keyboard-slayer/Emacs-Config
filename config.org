@@ -32,6 +32,12 @@
 #+BEGIN_SRC emacs-lisp
 (display-battery-mode 1)
 #+END_SRC
+** Change alignement
+#+BEGIN_SRC emacs-lisp
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+(setq indent-line-function 'insert-tab)
+#+END_SRC
 * Evil mode 
 #+BEGIN_SRC emacs-lisp
 (use-package evil
@@ -203,6 +209,9 @@
     :ensure t
     :init
     (setq ccls-executable "/usr/bin/ccls"))
+
+(setq c-default-style "linux"
+         c-basic-offset 4)
 #+END_SRC
 
 ** Go
