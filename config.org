@@ -18,7 +18,7 @@
 #+END_SRC
 ** Changing the font
 #+BEGIN_SRC emacs-lisp
-(set-face-attribute 'default nil :font "CaskaydiaCove Nerd Font" :height 180)
+(set-face-attribute 'default nil :font "TamzenForPowerline" :height 200)
 #+END_SRC
 ** Setup the backup dir
 #+BEGIN_SRC emacs-lisp
@@ -168,15 +168,28 @@
     (setq doom-modeline-lsp t))
 #+END_SRC
 
+* Company mode
+#+BEGIN_SRC emacs-lisp
+(use-package company
+    :ensure t
+    :init (global-company-mode))
+#+END_SRC
 * Programming
 ** Autocomplete
 #+BEGIN_SRC emacs-lisp
 (use-package auto-complete
     :ensure t
     :after (go-autocomplete)
+    :init (global-autocomplete-mode)
     :config
     (require 'go-autocomplete)
     (ac-config-default))
+#+END_SRC
+** Flycheck
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+  :ensure t
+  :init (global-flycheck-mode))
 #+END_SRC
 ** LSP
 #+BEGIN_SRC emacs-lisp
@@ -187,6 +200,7 @@
     :hook
     (python-mode . lsp)
     (c-mode . lsp)
+    (rust-mode . lsp)
     (go-mode . lsp))
     
 (use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
@@ -222,5 +236,12 @@
     :ensure t)
 
 (use-package go-autocomplete
+    :ensure t)
+#+END_SRC
+
+** Rust
+#+BEGIN_SRC emacs-lisp
+(use-package rust-mode
+    :bind (("C-c C-c" . rust-run))
     :ensure t)
 #+END_SRC
