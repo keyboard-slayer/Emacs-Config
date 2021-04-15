@@ -1,7 +1,6 @@
 * Emacs Configuration
 ** Disabling some stuff
 #+BEGIN_SRC emacs-lisp
-(setq inhibit-startup-screen t)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
 (menu-bar-mode -1)
@@ -18,7 +17,7 @@
 #+END_SRC
 ** Changing the font
 #+BEGIN_SRC emacs-lisp
-(set-face-attribute 'default nil :font "TamzenForPowerline" :height 200)
+(set-face-attribute 'default nil :font "CaskaydiaCove Nerd Font" :height 180)
 #+END_SRC
 ** Setup the backup dir
 #+BEGIN_SRC emacs-lisp
@@ -38,11 +37,22 @@
 (setq-default tab-width 4)
 (setq indent-line-function 'insert-tab)
 #+END_SRC
+* Dashboard
+#+BEGIN_SRC emacs-lisp
+(use-package dashboard
+    :ensure t
+    :init
+    (setq dashboard-startup-banner "~/.emacs.d/stignu.png")
+    (setq dashboard-footer-messages '("In Devse, we trust"))
+    (setq dashboard-banner-logo-title "Saint Ignucius welcomes you my child")
+    (dashboard-setup-startup-hook))
+#+END_SRC
 * Evil mode 
 #+BEGIN_SRC emacs-lisp
 (use-package evil
 	:ensure t
 	:init
+    (setq evil-want-keybinding nil)
 	(evil-mode 1))
 
 (use-package evil-org
@@ -56,6 +66,11 @@
 	  '(textobjects insert navigation additional shift todo heading))
     (add-hook 'org-mode-hook (lambda () (evil-org-mode)))
     (require 'evil-org-agenda))
+
+(use-package evil-collection
+    :ensure t
+    :init
+    (evil-collection-init))
 
 (use-package powerline-evil
     :ensure t
@@ -104,11 +119,37 @@
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
+* Ewal
+#+BEGIN_SRC emacs-lisp
+(use-package ewal-doom-themes
+    :ensure t
+    :init
+    (load-theme 'ewal-doom-vibrant t)
+    (enable-theme 'ewal-doom-vibrant))
+#+END_SRC
 * Org mode
 #+BEGIN_SRC emacs-lisp
 (setq org-adapt-indentation nil)
 (setq org-src-preserve-indentation t)
 (setq org-startup-folded t)
+#+END_SRC
+* Elfeed
+** Package
+#+BEGIN_SRC emacs-lisp
+(use-package elfeed
+    :config
+     (setq-default elfeed-search-filter "@1-week-ago +unread ")
+    :ensure t)
+(use-package elfeed-goodies
+    :ensure t
+    :preface
+    (elfeed-goodies/setup))
+#+END_SRC 
+** Feeds
+#+BEGIN_SRC emacs-lisp
+(setq elfeed-feeds (quote
+                      (("https://www.reddit.com/r/devse.rss" reddit devse)
+                       ("https://www.reddit.com/r/osdev.rss" reddit prog))))
 #+END_SRC
 * Ranger
 #+BEGIN_SRC emacs-lisp
@@ -197,6 +238,7 @@
     :ensure t
     :init
     (setq lsp-keymap-prefix "C-c l")
+    (setq lsp-clients-clangd-executable "/usr/bin/clangd")
     :hook
     (python-mode . lsp)
     (c-mode . lsp)
@@ -216,18 +258,6 @@
   (require 'haskell-process)
   (add-hook 'haskell-mode-hook 'interactive-haskell-mode))
 #+END_SRC
-** C/C++
-#+BEGIN_SRC emacs-lisp
-;; Don't forget to install it with your package manager
-(use-package ccls
-    :ensure t
-    :init
-    (setq ccls-executable "/usr/bin/ccls"))
-
-(setq c-default-style "linux"
-         c-basic-offset 4)
-#+END_SRC
-
 ** Go
 #+BEGIN_SRC emacs-lisp
 (setenv "GOPATH" (concat "/home/" (getenv "USER") "/go"))
