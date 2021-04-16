@@ -140,16 +140,60 @@
     :config
      (setq-default elfeed-search-filter "@1-week-ago +unread ")
     :ensure t)
-(use-package elfeed-goodies
-    :ensure t
-    :preface
-    (elfeed-goodies/setup))
 #+END_SRC 
 ** Feeds
 #+BEGIN_SRC emacs-lisp
 (setq elfeed-feeds (quote
                       (("https://www.reddit.com/r/devse.rss" reddit devse)
+                       ("https://hnrss.org/frontpage" hackernews prog)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCVls1GmFKf6WlTraIb_IaJg" youtube linux)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCLhcQ0bBZTLipRJ7D42Riow" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UClcE-kVhqyiHCcjYwcpfj9w" youtube infosec)
+                       ("https://www.youtube.com/feeds/vidoes.xml?channel_id=UCM0B2tvEttmL-gFP1_sgvSA" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCld68syR8Wi-GY_n4CaoJGA" youtube linux)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCQUMjdiwuIYbH-oveKmOdZg" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCkmEoZbpH7jPCe1_Ym4XJdQ" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCM64dJz1HdlmYlZ8xYSO8TA" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCAR30oDTNbJE-Zd2NDg1mTQ" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCy27yRGCANDSrvQWzh5VuNA" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCK33kufuprDPsfRPkMfgoRA" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJcnvMekEXIlw4Q5o_aoiMw" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCAcAnMF0OrCtUep3Y4M-ZPw" youtube fr news)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCgN1463ngpGdCpAbCBGFteg" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJcYRr8rpsxVPfWA5vkuxFw" youtube music comedy)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCVeW9qkBjo3zosnqUbG7CFw" youtube infosec)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UC2eYFnH61tmytImy1mTYvhA" youtube linux)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCjFaPUcJU1vwk193mnW_w1w" youtube retrotech homebrew)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS0N5baNlQWJCUrhCEo8WlA" youtube prog lowlevel)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrh0I8I0l6eAj2DuW0GE_Fg" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UC599MoN2FAQyhHeopdKDHqA" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCfVczXnryp-xB2xBG3ocUgw" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-lHJZR3Gqxm24_Vd_AJ5Yw" youtube comedy)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCW6xlqxSY3gGur4PkGPEUeA" youtube infosec)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJKdHhXovF8tsWa9bCKOZTg" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3S8vxwRfqLBdIhgRlDRVzw" youtube infosec)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCk20cSRhH_ms_Yk1AZItFqA" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCeeFfhMcJa1kjtfZAGskOCA" youtube tech news)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCYaSz9Ywjgv7J_Wjdx2Y37A" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCmcqSvN5dAHPOY5zVsLUrOg" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCjr2bPAyPV7t35MvcgT3W8Q" youtube infosec)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCEp20NgOZHmgWdbQdHSxgjw" youtube retrotech)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCEbYhDd6c6vngsF5PQpFVWg" youtube functional prog)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCsnGwSIHyoYN0kiINAGUKxg" youtube linux)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCkMYR1Nerqm5U6LQZpayMhg" youtube music)
+                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCVbRGNXwrOMEZ1qzGBPf-ow" youtube music)
                        ("https://www.reddit.com/r/osdev.rss" reddit prog))))
+#+END_SRC
+** Mpv
+#+BEGIN_SRC emacs-lisp
+(defun browse-url-mpv (url &optional new-window)
+    (start-process "mpv" "*mpv*" "mpv" url))
+
+(defun browse-url-surf (url &optional new-window)
+    (start-process "surf" "*surf*" "surf" url))
+
+(setq browse-url-browser-function '(("https:\\/\\/www\\.youtube." . browse-url-mpv)
+    ("." . browse-url-surf)))
 #+END_SRC
 * Ranger
 #+BEGIN_SRC emacs-lisp
