@@ -1,10 +1,3 @@
-ls
-ping 1.1.1.1
-clear
-clear
-clear
-ls
-ls
 #+TITLE: Emacs config
 #+AUTHOR: Keyboard Slayer
 
@@ -30,6 +23,8 @@ ls
 ** Tweak UI
 #+BEGIN_SRC elisp
 (column-number-mode 1)
+(setq display-time-day-and-date t)
+(display-time-mode 1)
 (global-display-line-numbers-mode t)
 (display-battery-mode 1)
 (set-face-attribute 'default nil :font "CaskaydiaCove Nerd Font" :height 160)
@@ -426,4 +421,79 @@ int main(int argc, char *argv[])
     (propertize "❯" 'face `(:foreground "yellow"))
     (propertize "❯" 'face `(:foreground "green"))
     (propertize " "))))
+#+END_SRC
+
+** Exwm
+*** Setup Exwm
+#+BEGIN_SRC elisp
+
+(defun kbd/exwm-update-class ()
+  (exwm-workspace-rename-buffer exwm-class-name))
+
+(defun kbd/update-displays () 
+  (message "Display config: %s"
+           (string-trim (shell-command-to-string "autorandr --current"))))
+
+(use-package exwm
+  :ensure t
+  :config
+  (setq exwm-workspace-number 10)
+  (setq exwm-input-prefix-keys
+        '(?\C-x
+          ?\C-u
+          ?\C-h
+          ?\M-x
+          ?\M-`
+          ?\M-&
+          ?\M-:
+          ?\C-\M-j
+          ?\C-\ ))
+  
+  (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+  (add-hook 'exwm-update-class-hook #'kbd/exwm-update-class)
+
+  (setq exwm-input-global-keys
+        `(
+          ([\?s-r] . window-reset)
+          ([s-left] . windmove-left)
+          ([s-right] . window-right)
+          ([s-up] . window-up)
+          ([s-down] . window-down)
+          ))
+
+  (require 'exwm-randr)
+  (exwm-randr-enable)
+  (add-hook 'exwm-randr-screen-change-hook #'kbd/update-displays)
+  
+(setq exwm-randr-workspace-monitor-plist '(0 "HDMI-1"
+                                             1 "DVI-D-1"))
+
+  (kbd/update-displays)
+
+  (require 'exwm-systemtray)
+  (exwm-systemtray-enable)
+
+  (exwm-enable))
+#+END_SRC
+
+*** Post Exwm setup
+#+BEGIN_SRC elisp
+
+(defun kbd/run-in-background (command)
+  (let ((command-parts (split-string command "[ ]+")))
+    (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+
+(start-process-shell-command "feh" nil "feh --bg-scale ~/.wal.jpeg")
+(start-process-shell-command "picom" nil "picom -b")
+(start-process-shell-command "setxkbmap" nil "setxkbmap be")
+(setq mouse-autoselect-window t
+      focus-follow-mouse t
+      exwm-layout-show-all-buffers t
+      exwm-workspace-show-all-buffers t)
+#+END_SRC
+
+*** Exwm keymaps
+#+BEGIN_SRC elisp
+(exwm-input-set-key (kbd "s-d") 'counsel-linux-app)
+(exwm-input-set-key (kbd "s-f") 'exwm-layout-toggle-fullscreen)
 #+END_SRC
