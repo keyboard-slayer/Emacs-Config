@@ -1,86 +1,174 @@
-* Emacs Configuration
-** Disabling some stuff
-#+BEGIN_SRC emacs-lisp
-(tool-bar-mode -1)
-(scroll-bar-mode -1)
-(menu-bar-mode -1)
-(setq ring-bell-function 'ignore)
-(defalias 'yes-or-no-p 'y-or-n-p)
-(column-number-mode)
-(global-display-line-numbers-mode t)
+#+TITLE: Emacs config
+#+AUTHOR: Keyboard Slayer
 
-(dolist (mode '(org-mode-hook
-		term-mode-hook
-		shell-mode-hook
-		eshell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode m))))
+** Keep folders clean
+#+BEGIN_SRC elisp
+(setq backup-directory-alist `(("." .,(expand-file-name "backups/" user-emacs-directory))))
+
+(make-directory (expand-file-name "auto-saves/" user-emacs-directory) t)
+
+(setq auto-save-list-file-prefix (expand-file-name "auto-saves/sessions/" user-emacs-directory)
+      auto-save-file-name-transforms `((".*" ,(expand-file-name "auto-saves/" user-emacs-directory) t)))
+
+(setq create-lockfiles nil)
+(setq user-emacs-directory (expand-file-name "~/.cache/emacs"))
 #+END_SRC
-** Changing the font
-#+BEGIN_SRC emacs-lisp
-(set-face-attribute 'default nil :font "CaskaydiaCove Nerd Font" :height 180)
+** Disable Useless UI
+#+BEGIN_SRC elisp
+(menu-bar-mode -1)
+(toggle-scroll-bar -1)
+(tool-bar-mode -1)
+(setq inhibit-startup-message t)
 #+END_SRC
-** Setup the backup dir
-#+BEGIN_SRC emacs-lisp
-(setq backup-directory-alist '(("." . "~/.emacs-saves")))
-#+END_SRC
-** Enable prettify symbols
-#+BEGIN_SRC emacs-lisp
-(global-prettify-symbols-mode +1)
-#+END_SRC
-** Enable battery indicator
-#+BEGIN_SRC emacs-lisp
+** Tweak UI
+#+BEGIN_SRC elisp
+(column-number-mode 1)
+(global-display-line-numbers-mode t)
 (display-battery-mode 1)
+(set-face-attribute 'default nil :font "CaskaydiaCove Nerd Font" :height 160)
+(set-face-attribute 'variable-pitch nil :font "CaskaydiaCove Nerd Font" :height 160)
+(set-frame-parameter (selected-frame) 'alpha '(85 . 85))
+(add-to-list 'default-frame-alist '(alpha . (85 . 85)))
+(global-set-key (kbd "C-<tab>") 'next-buffer)
 #+END_SRC
-** Change alignement
-#+BEGIN_SRC emacs-lisp
+** Disable line numbers on certain mode
+#+BEGIN_SRC elisp
+(dolist (mode '(org-mode-hook
+                 term-mode-hook
+                 eshell-mode-hook))
+        (add-hook mode (lambda () (display-line-numbers-mode 0))))
+#+END_SRC
+** Tweak Indentation
+#+BEGIN_SRC elisp
 (setq-default indent-tabs-mode nil)
 (setq-default tab-width 4)
 (setq indent-line-function 'insert-tab)
+(setq c-default-style "linux") 
+(setq c-basic-offset 4) 
+(c-set-offset 'comment-intro 0)
+(electric-indent-mode -1)
 #+END_SRC
-* Dashboard
-#+BEGIN_SRC emacs-lisp
-(use-package dashboard
+** Package Managing
+#+BEGIN_SRC elisp
+(require 'package)
+(setq package-enable-at-startup nil)
+(package-initialize)
+(setq package-archives
+      '(("melpa" . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/melpa/")
+        ("org"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/org/")
+        ("gnu"   . "https://raw.githubusercontent.com/d12frosted/elpa-mirror/master/gnu/")))
+
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(eval-when-compile
+  (require 'use-package))
+
+(setq use-package-always-ensure t)
+(setq use-package-compute-statistics t)
+(setq package-check-signature nil)
+
+(use-package diminish)
+#+END_SRC
+
+** Tweak Org
+#+BEGIN_SRC elisp
+(org-indent-mode)
+
+(use-package org
+  :hook (org-mode . (lambda () (org-indent-mode)
+                      (variable-pitch-mode 1)
+                      (auto-fill-mode 0)
+                      (visual-line-mode 1)
+                      (setq evil-auto-indent nil)))
+  :custom 
+  (org-adapt-indentation nil)
+  (org-src-preserve-indentation t)
+  (org-startup-folded t)
+  (org-directory "~/Documents/Org")
+  (org-agenda-start-with-log-mode t)
+  (org-log-done 'timer)
+  (org-agenda-files '("~/Documents/Org"))
+  (org-log-into-drawer t))
+
+(use-package org-bullets
+  :after org
+  :hook (org-mode . org-bullets-mode)
+  :custom
+  (org-bullets-bullet-list '("◉" "○" "●" "○" "●" "○" "●")))
+
+ (font-lock-add-keywords 'org-mode
+                          '(("^ *\\([-]\\) "
+                             (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) "•"))))))
+
+ (dolist (face '((org-level-1 . 1.2)
+                  (org-level-2 . 1.1)
+                  (org-level-3 . 1.05)
+                  (org-level-4 . 1.0)
+                  (org-level-5 . 1.1)
+                  (org-level-6 . 1.1)
+                  (org-level-7 . 1.1)
+                  (org-level-8 . 1.1)))
+    (set-face-attribute (car face) nil :font "CaskaydiaCove Nerd Font" :weight 'regular :height (cdr face)))
+
+
+(use-package visual-fill-column
+    :defer t
+    :ensure t
+    :hook (org-mode . (lambda () (setq visual-fill-column-width 70
+                           visual-fill-column-center-text t)
+            (visual-fill-column-mode 1))))
+
+#+END_SRC
+** Evil Mode 
+#+BEGIN_SRC elisp
+(defun kbd/evil-hook ()
+  (dolist (mode '(custom-mode
+                  eshell-mode
+                  git-rebase-mode
+                  erc-mode
+                  circe-server-mode
+                  circe-chat-mode
+                  circe-query-mode
+                  sauron-mode
+                  term-mode))
+  (add-to-list 'evil-emacs-state-modes mode)))
+
+
+(use-package evil
     :ensure t
     :init
-    (setq dashboard-startup-banner "~/.emacs.d/stignu.png")
-    (setq dashboard-footer-messages '("In Devse, we trust"))
-    (setq dashboard-banner-logo-title "Saint Ignucius welcomes you my child")
-    (dashboard-setup-startup-hook))
-#+END_SRC
-* Evil mode 
-#+BEGIN_SRC emacs-lisp
-(use-package evil
-	:ensure t
-	:init
+    (setq evil-want-integration t)
     (setq evil-want-keybinding nil)
-	(evil-mode 1))
-
-(use-package evil-org
-    :ensure t
+    (setq evil-want-C-i-jump nil)
+    (evil-mode 1)
     :config
-    (add-hook 'org-mode-hook 'evil-org-mode)
-    (add-hook 'evil-org-mode-hook
-	    (lambda ()
-            (evil-org-set-key-theme)))
-    (evil-org-set-key-theme
-	  '(textobjects insert navigation additional shift todo heading))
-    (add-hook 'org-mode-hook (lambda () (evil-org-mode)))
-    (require 'evil-org-agenda))
+    (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+    (evil-global-set-key 'motion "k" 'evil-previous-visual-line))
 
 (use-package evil-collection
-    :ensure t
-    :init
-    (evil-collection-init))
-
-(use-package powerline-evil
+    :after evil
     :ensure t
     :config
-    (powerline-evil-vim-color-theme))
+    (evil-collection-init))
 #+END_SRC
+** Which Key
+#+BEGIN_SRC elisp
+(use-package which-key
+    :config
+    (which-key-mode))
+#+END_SRC
+** Theme
+#+BEGIN_SRC elisp
+(use-package ayu-theme
+  :config (load-theme 'ayu-dark t))
 
-* Ivy
-#+BEGIN_SRC emacs-lisp
-    (use-package ivy
+(set-background-color "black")
+#+END_SRC 
+** Ivy
+#+BEGIN_SRC elisp
+(use-package ivy
       :diminish
       :bind (("C-s" . swiper)
 	     :map ivy-minibuffer-map
@@ -99,14 +187,13 @@
 
 (use-package ivy-rich
   :init (ivy-rich-mode 1))
-#+END_SRC
-* Counsel
-#+BEGIN_SRC emacs-lisp
+
 (use-package counsel
   :bind (("M-x" . counsel-M-x)
          ("C-x b" . counsel-ibuffer)
          ("C-x C-f" . counsel-find-file)
          ("C-M-l" . counsel-imenu)
+         ("C-M-j" . counsel-switch-buffer)
          :map minibuffer-local-map
          ("C-r" . 'counsel-minibuffer-history))
   :custom
@@ -114,38 +201,37 @@
   :config
   (setq ivy-initial-inputs-alist nil))
 #+END_SRC
-* Rainbow Delimiters
-#+BEGIN_SRC emacs-lisp
+** Doom modeline
+#+BEGIN_SRC elisp
+(use-package all-the-icons
+    :ensure t)
+    
+(use-package doom-modeline
+    :ensure t
+    :hook (after-init . doom-modeline-mode)
+    :config
+    (setq doom-modeline-buffer-file-name-style 'auto)
+    (setq doom-modeline-major-mode-icon t)
+    (setq doom-modeline-major-mode-color-icon t)
+    (setq doom-modeline-vcs-max-length 12)
+    (setq doom-modeline-number-limit 99)
+    (setq doom-modeline-lsp t))
+#+END_SRC
+
+** Rainbow Delimiter
+#+BEGIN_SRC elisp
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
-* Ewal
-#+BEGIN_SRC emacs-lisp
-(use-package ewal-doom-themes
-    :ensure t
-    :init
-    (load-theme 'ewal-doom-vibrant t)
-    (enable-theme 'ewal-doom-vibrant))
-#+END_SRC
-* Org mode
-#+BEGIN_SRC emacs-lisp
-(setq org-adapt-indentation nil)
-(setq org-src-preserve-indentation t)
-(setq org-startup-folded t)
-#+END_SRC
-* Elfeed
-** Package
-#+BEGIN_SRC emacs-lisp
+** Elfeed
+#+BEGIN_SRC elisp
 (use-package elfeed
     :config
      (setq-default elfeed-search-filter "@1-week-ago +unread ")
     :ensure t)
-#+END_SRC 
-** Feeds
-#+BEGIN_SRC emacs-lisp
+
 (setq elfeed-feeds (quote
                       (("https://www.reddit.com/r/devse.rss" reddit devse)
-                       ("https://hnrss.org/frontpage" hackernews prog)
                        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCVls1GmFKf6WlTraIb_IaJg" youtube linux)
                        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCLhcQ0bBZTLipRJ7D42Riow" youtube music)
                        ("https://www.youtube.com/feeds/videos.xml?channel_id=UClcE-kVhqyiHCcjYwcpfj9w" youtube infosec)
@@ -184,8 +270,9 @@
                        ("https://www.youtube.com/feeds/videos.xml?channel_id=UCVbRGNXwrOMEZ1qzGBPf-ow" youtube music)
                        ("https://www.reddit.com/r/osdev.rss" reddit prog))))
 #+END_SRC
+
 ** Mpv
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC elisp
 (defun browse-url-mpv (url &optional new-window)
     (start-process "mpv" "*mpv*" "mpv" url))
 
@@ -195,127 +282,118 @@
 (setq browse-url-browser-function '(("https:\\/\\/www\\.youtube." . browse-url-mpv)
     ("." . browse-url-surf)))
 #+END_SRC
-* Ranger
-#+BEGIN_SRC emacs-lisp
-(use-package ranger
-    :ensure t
-    :init
-    (ranger-override-dired-mode t)
-    :bind (("C-x C-d" . ranger)))
-#+END_SRC
 
-* Treemacs
-#+BEGIN_SRC emacs-lisp
-(use-package treemacs
-    :ensure t
-    :bind (("<f8>" . treemacs)))
-
-(use-package treemacs-evil
-    :ensure t)
-#+END_SRC
-
-* Multiple cursor
-#+BEGIN_SRC emacs-lisp
+** Multiple Cursor
+#+BEGIN_SRC elisp
 (use-package multiple-cursors
     :ensure t
     :bind (("C-<down>" . mc/mark-next-like-this)
         ("C-<up>" . mc/mark-previous-like-this)))
-
 #+END_SRC
 
-* PDF tools
-#+BEGIN_SRC emacs-lisp
-(use-package pdf-tools
-    :ensure t
-    :preface
-    (pdf-tools-install))
-#+END_SRC
-* Emoji with emacs
-#+BEGIN_SRC emacs-lisp
-(use-package emojify
-    :ensure t
-    :hook (after-init . global-emojify-mode))
-#+END_SRC
-* Doom modeline
-#+BEGIN_SRC emacs-lisp
-(use-package all-the-icons
-    :ensure t)
-    
-(use-package doom-modeline
-    :ensure t
-    :hook (after-init . doom-modeline-mode)
-    :config
-    (setq doom-modeline-buffer-file-name-style 'auto)
-    (setq doom-modeline-major-mode-icon t)
-    (setq doom-modeline-major-mode-color-icon t)
-    (setq doom-modeline-vcs-max-length 12)
-    (setq doom-modeline-number-limit 99)
-    (setq doom-modeline-lsp t))
-#+END_SRC
-
-* Company mode
-#+BEGIN_SRC emacs-lisp
-(use-package company
-    :ensure t
-    :init (global-company-mode))
-#+END_SRC
-* Programming
-** Autocomplete
-#+BEGIN_SRC emacs-lisp
-(use-package auto-complete
-    :ensure t
-    :after (go-autocomplete)
-    :init (global-autocomplete-mode)
-    :config
-    (require 'go-autocomplete)
-    (ac-config-default))
-#+END_SRC
-** Flycheck
-#+BEGIN_SRC emacs-lisp
-(use-package flycheck
-  :ensure t
-  :init (global-flycheck-mode))
-#+END_SRC
-** LSP
-#+BEGIN_SRC emacs-lisp
-(use-package lsp-mode
-    :ensure t
+** Projectile
+#+BEGIN_SRC elisp
+(use-package projectile
+    :config (projectile-mode)
     :init
-    (setq lsp-keymap-prefix "C-c l")
-    (setq lsp-clients-clangd-executable "/usr/bin/clangd")
-    :hook
-    (python-mode . lsp)
-    (c-mode . lsp)
-    (rust-mode . lsp)
-    (go-mode . lsp))
-    
-(use-package lsp-ivy :commands lsp-ivy-workspace-symbol)
-(use-package lsp-treemacs :commands lsp-treemacs-errors-list)
+    (setq projectile-project-search-path '("~/Documents"))
+    (setq projectile-switch-project-action #'projectile-dired))
 #+END_SRC
-** Haskell
-*** Mode
-#+BEGIN_SRC emacs-lisp
-(use-package haskell-mode
-  :ensure t
+** General
+#+BEGIN_SRC elisp
+(use-package general
+    :ensure t
+    :config
+    (general-create-definer kbd/leader-keys
+        :keymaps '(normal insert visual emacs)
+        :prefix "SPC"
+        :global-prefix "C-SPC")
+
+    (kbd/leader-keys
+        "D" '(dired-jump :which-key "Dired buffer directory")
+        "d" '(projectile-dired :which-key "Dired into project")
+        "x" '(projectile-run-shell :which-key "Run shell on project directory")
+        "f" '(projectile--find-file :which-key "Find file in project")
+        "s" '(projectile-switch-project :which-key "Switch project")))
+#+END_SRC
+** Makefile
+#+BEGIN_SRC elisp
+(use-package makefile-executor
   :config
-  (require 'haskell-interactive-mode)
-  (require 'haskell-process)
-  (add-hook 'haskell-mode-hook 'interactive-haskell-mode))
+  (add-hook 'makefile-mode-hook 'makefile-executor-mode))
 #+END_SRC
-** Go
-#+BEGIN_SRC emacs-lisp
-(setenv "GOPATH" (concat "/home/" (getenv "USER") "/go"))
 
-(use-package go-mode
-    :ensure t)
-
-(use-package go-autocomplete
+** Magit
+#+BEGIN_SRC elisp
+(use-package magit
     :ensure t)
 #+END_SRC
 
-** Rust
-#+BEGIN_SRC emacs-lisp
-(use-package rust-mode
-    :bind (("C-c C-c" . rust-run))
-    :ensure t)
+** LSP mode
+#+BEGIN_SRC elisp
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook 
+  (c-mode . lsp)
+  :init
+  (setq lsp-keymap-prefix "C-c l")
+  :config
+  (lsp-enable-which-key-integration t))
+
+(use-package lsp-ui 
+    :requires (lsp-mode)
+    :commands lsp-ui-mode
+    :hook (lsp-mode . lsp-ui-mode)
+    :config
+    (setq lsp-ui-sideline-ignore-duplicate t))
+#+END_SRC
+** Org Babel
+#+BEGIN_SRC elisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (C . t)
+   (python . t)))
+
+(setq org-confirm-babel-evaluate nil)
+#+END_SRC
+
+Here is an example: 
+
+#+BEGIN_SRC C :results value
+
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    for (int i = 0; i < 100; i++)
+    {
+        printf("%d ", i);
+    }
+}
+
+#+END_SRC
+
+#+RESULTS:
+: 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99
+
+** Dired 
+#+BEGIN_SRC elisp
+(use-package all-the-icons-dired
+  :ensure t
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config 
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "H" 'dired-hide-dotfiles-mode))
+
+(use-package dired
+  :ensure nil
+  :commands (dired dired-jump)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-up-directory
+    "l" 'dired-find-file))
 #+END_SRC
