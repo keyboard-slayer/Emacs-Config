@@ -1,3 +1,10 @@
+ls
+ping 1.1.1.1
+clear
+clear
+clear
+ls
+ls
 #+TITLE: Emacs config
 #+AUTHOR: Keyboard Slayer
 
@@ -396,4 +403,27 @@ int main(int argc, char *argv[])
   (evil-collection-define-key 'normal 'dired-mode-map
     "h" 'dired-up-directory
     "l" 'dired-find-file))
+#+END_SRC
+
+** Eshell
+#+BEGIN_SRC elisp
+(defun pwd-replace-home (pwd)
+  "Replace home in PWD with tilde (~) character."
+  (interactive)
+  (let* ((home (expand-file-name (getenv "HOME")))
+         (home-len (length home)))
+    (if (and
+         (>= (length pwd) home-len)
+         (equal home (substring pwd 0 home-len)))
+        (concat "~" (substring pwd home-len))
+      pwd)))
+
+(setq eshell-prompt-function (lambda ()
+   (concat
+    (propertize (pwd-replace-home (eshell/pwd)) 'face `(:foreground "blue"))
+    (propertize " ")
+    (propertize "❯" 'face `(:foreground "red"))
+    (propertize "❯" 'face `(:foreground "yellow"))
+    (propertize "❯" 'face `(:foreground "green"))
+    (propertize " "))))
 #+END_SRC
