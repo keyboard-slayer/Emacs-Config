@@ -29,14 +29,13 @@
 (display-battery-mode 1)
 (set-face-attribute 'default nil :font "CaskaydiaCove Nerd Font" :height 160)
 (set-face-attribute 'variable-pitch nil :font "CaskaydiaCove Nerd Font" :height 160)
-(set-frame-parameter (selected-frame) 'alpha '(85 . 85))
-(add-to-list 'default-frame-alist '(alpha . (85 . 85)))
 (global-set-key (kbd "C-<tab>") 'next-buffer)
 #+END_SRC
 ** Disable line numbers on certain mode
 #+BEGIN_SRC elisp
 (dolist (mode '(org-mode-hook
                  term-mode-hook
+                 treemacs-mode-hook
                  eshell-mode-hook))
         (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+END_SRC
@@ -163,10 +162,14 @@
 #+END_SRC
 ** Theme
 #+BEGIN_SRC elisp
-(use-package ayu-theme
-  :config (load-theme 'ayu-dark t))
+(use-package doom-themes
+  :ensure t
+  :config
+  (setq doom-themes-enable-bold t 
+        doom-themes-enable-italic t)
 
-(set-background-color "black")
+  (doom-themes-org-config)
+  (load-theme 'doom-1337 t))
 #+END_SRC 
 ** Ivy
 #+BEGIN_SRC elisp
@@ -316,6 +319,8 @@
         "d" '(projectile-dired :which-key "Dired into project")
         "x" '(projectile-run-shell :which-key "Run shell on project directory")
         "f" '(projectile--find-file :which-key "Find file in project")
+        "t" '(treemacs-select-window :which-key "Treemacs")
+        "c" '(centaur-tabs-mode :which-key "Enabled centaur-tabs")
         "s" '(projectile-switch-project :which-key "Switch project")))
 #+END_SRC
 ** Makefile
@@ -423,77 +428,35 @@ int main(int argc, char *argv[])
     (propertize " "))))
 #+END_SRC
 
-** Exwm
-*** Setup Exwm
+** Tabs
 #+BEGIN_SRC elisp
-
-(defun kbd/exwm-update-class ()
-  (exwm-workspace-rename-buffer exwm-class-name))
-
-(defun kbd/update-displays () 
-  (message "Display config: %s"
-           (string-trim (shell-command-to-string "autorandr --current"))))
-
-(use-package exwm
+(use-package centaur-tabs 
   :ensure t
   :config
-  (setq exwm-workspace-number 10)
-  (setq exwm-input-prefix-keys
-        '(?\C-x
-          ?\C-u
-          ?\C-h
-          ?\M-x
-          ?\M-`
-          ?\M-&
-          ?\M-:
-          ?\C-\M-j
-          ?\C-\ ))
-  
-  (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
-  (add-hook 'exwm-update-class-hook #'kbd/exwm-update-class)
-
-  (setq exwm-input-global-keys
-        `(
-          ([\?s-r] . window-reset)
-          ([s-left] . windmove-left)
-          ([s-right] . window-right)
-          ([s-up] . window-up)
-          ([s-down] . window-down)
-          ))
-
-  (require 'exwm-randr)
-  (exwm-randr-enable)
-  (add-hook 'exwm-randr-screen-change-hook #'kbd/update-displays)
-  
-(setq exwm-randr-workspace-monitor-plist '(0 "HDMI-1"
-                                             1 "DVI-D-1"))
-
-  (kbd/update-displays)
-
-  (require 'exwm-systemtray)
-  (exwm-systemtray-enable)
-
-  (exwm-enable))
+  (setq centaur-tabs-style "bar"
+        centaur-tabs-set-bar 'over
+        centaur-tabs-set-modified-marker t
+        centaur-tabs-set-icons t)
+  :bind
+  ("C-<prior>" . centaur-tabs-backward)
+  ("C-<next>" . centaur-tabs-forward))
 #+END_SRC
 
-*** Post Exwm setup
+** Treemacs
 #+BEGIN_SRC elisp
+(use-package treemacs
+  :ensure t
+  :defer t)
 
-(defun kbd/run-in-background (command)
-  (let ((command-parts (split-string command "[ ]+")))
-    (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+(use-package treemacs-evil
+  :after (treemacs evil)
+  :ensure t)
 
-(start-process-shell-command "feh" nil "feh --bg-scale ~/.wal.jpeg")
-(start-process-shell-command "picom" nil "picom -b")
-(start-process-shell-command "setxkbmap" nil "setxkbmap be")
-(setq mouse-autoselect-window t
-      focus-follow-mouse t
-      exwm-layout-show-all-buffers t
-      exwm-workspace-show-all-buffers t)
-#+END_SRC
+(use-package treemacs-projectile
+  :after (treemacs projectile)
+  :ensure t)
 
-*** Exwm keymaps
-#+BEGIN_SRC elisp
-(exwm-input-set-key (kbd "s-d") 'counsel-linux-app)
-(exwm-input-set-key (kbd "s-f") 'exwm-layout-toggle-fullscreen)
+(use-package treemacs-magit
+  :after (treemacs magit)
+  :ensure t)
 #+END_SRC
