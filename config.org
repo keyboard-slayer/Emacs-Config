@@ -169,7 +169,7 @@
         doom-themes-enable-italic t)
 
   (doom-themes-org-config)
-  (load-theme 'doom-1337 t))
+  (load-theme 'doom-vibrant t))
 #+END_SRC 
 ** Ivy
 #+BEGIN_SRC elisp
@@ -300,6 +300,7 @@
 #+BEGIN_SRC elisp
 (use-package projectile
     :config (projectile-mode)
+    :bind ("C-c k" . projectile-compile-project)
     :init
     (setq projectile-project-search-path '("~/Documents"))
     (setq projectile-switch-project-action #'projectile-dired))
@@ -459,4 +460,34 @@ int main(int argc, char *argv[])
 (use-package treemacs-magit
   :after (treemacs magit)
   :ensure t)
+#+END_SRC
+
+** Clang format
+#+BEGIN_SRC elisp
+(use-package clang-format
+  :ensure t
+  :config
+  (setq clang-format-style-option "file")
+  :bind
+  ("C-c f" . clang-format-buffer))
+#+END_SRC
+** Company
+#+BEGIN_SRC elisp
+(use-package company
+:ensure t
+:after lsp-mode
+:hook (lsp-mode . company-mode)
+:bind (:map company-active-map
+            ("<tab>" . company-complete-selection))
+(:map lsp-mode-map
+      ("<tab>" . company-indent-or-complete-common))
+
+:custom
+(company-minimum-prefix-length 1)
+(company-idle-delay 0.0))
+
+(use-package company-box
+  :hook (company-mode . company-box-mode))
+
+
 #+END_SRC
