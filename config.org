@@ -498,7 +498,9 @@ int main(int argc, char *argv[])
         '(?\C-x
           ?\C-h
           ?\C-w
-          ?\s-
+          ?\s-h
+          ?\s-v
+          ?\s-q
           ?\M-x))
 
   (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
