@@ -16,9 +16,8 @@
 ** Disable Useless UI
 #+BEGIN_SRC elisp
 (menu-bar-mode -1)
-(toggle-scroll-bar -1)
 (tool-bar-mode -1)
-(setq inhibit-startup-message t)
+(scroll-bar-mode -1)
 #+END_SRC
 ** Tweak UI
 #+BEGIN_SRC elisp
@@ -30,6 +29,10 @@
 (set-face-attribute 'default nil :font "CaskaydiaCove Nerd Font" :height 160)
 (set-face-attribute 'variable-pitch nil :font "CaskaydiaCove Nerd Font" :height 160)
 (global-set-key (kbd "C-<tab>") 'next-buffer)
+(set-frame-parameter (selected-frame) 'alpha '(90 . 90))
+(add-to-list 'default-frame-alist '(alpha . (90 . 90)))
+(set-frame-parameter (selected-frame) 'fullscreen 'maximized)
+(add-to-list 'default-frame-alist '(fullscreen . maximized))
 #+END_SRC
 ** Disable line numbers on certain mode
 #+BEGIN_SRC elisp
@@ -117,7 +120,7 @@
 (use-package visual-fill-column
     :defer t
     :ensure t
-    :hook (org-mode . (lambda () (setq visual-fill-column-width 70
+    :hook (org-mode . (lambda () (setq visual-fill-column-width 100
                            visual-fill-column-center-text t)
             (visual-fill-column-mode 1))))
 
@@ -169,7 +172,7 @@
         doom-themes-enable-italic t)
 
   (doom-themes-org-config)
-  (load-theme 'doom-vibrant t))
+  (load-theme 'doom-dracula t))
 #+END_SRC 
 ** Ivy
 #+BEGIN_SRC elisp
@@ -198,7 +201,7 @@
          ("C-x b" . counsel-ibuffer)
          ("C-x C-f" . counsel-find-file)
          ("C-M-l" . counsel-imenu)
-         ("C-M-j" . counsel-switch-buffer)
+         ("s-<tab>" . counsel-switch-buffer)
          :map minibuffer-local-map
          ("C-r" . 'counsel-minibuffer-history))
   :custom
@@ -223,57 +226,12 @@
     (setq doom-modeline-lsp t))
 #+END_SRC
 
-** Rainbow Delimiter
-#+BEGIN_SRC elisp
-(use-package rainbow-delimiters
-  :hook (prog-mode . rainbow-delimiters-mode))
-#+END_SRC
 ** Elfeed
 #+BEGIN_SRC elisp
 (use-package elfeed
     :config
      (setq-default elfeed-search-filter "@1-week-ago +unread ")
     :ensure t)
-
-(setq elfeed-feeds (quote
-                      (("https://www.reddit.com/r/devse.rss" reddit devse)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCVls1GmFKf6WlTraIb_IaJg" youtube linux)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCLhcQ0bBZTLipRJ7D42Riow" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UClcE-kVhqyiHCcjYwcpfj9w" youtube infosec)
-                       ("https://www.youtube.com/feeds/vidoes.xml?channel_id=UCM0B2tvEttmL-gFP1_sgvSA" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCld68syR8Wi-GY_n4CaoJGA" youtube linux)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCQUMjdiwuIYbH-oveKmOdZg" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCkmEoZbpH7jPCe1_Ym4XJdQ" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCM64dJz1HdlmYlZ8xYSO8TA" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCAR30oDTNbJE-Zd2NDg1mTQ" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCy27yRGCANDSrvQWzh5VuNA" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCK33kufuprDPsfRPkMfgoRA" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJcnvMekEXIlw4Q5o_aoiMw" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCAcAnMF0OrCtUep3Y4M-ZPw" youtube fr news)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCgN1463ngpGdCpAbCBGFteg" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJcYRr8rpsxVPfWA5vkuxFw" youtube music comedy)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCVeW9qkBjo3zosnqUbG7CFw" youtube infosec)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UC2eYFnH61tmytImy1mTYvhA" youtube linux)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCjFaPUcJU1vwk193mnW_w1w" youtube retrotech homebrew)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCS0N5baNlQWJCUrhCEo8WlA" youtube prog lowlevel)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCrh0I8I0l6eAj2DuW0GE_Fg" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UC599MoN2FAQyhHeopdKDHqA" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCfVczXnryp-xB2xBG3ocUgw" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UC-lHJZR3Gqxm24_Vd_AJ5Yw" youtube comedy)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCW6xlqxSY3gGur4PkGPEUeA" youtube infosec)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCJKdHhXovF8tsWa9bCKOZTg" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UC3S8vxwRfqLBdIhgRlDRVzw" youtube infosec)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCk20cSRhH_ms_Yk1AZItFqA" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCeeFfhMcJa1kjtfZAGskOCA" youtube tech news)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCYaSz9Ywjgv7J_Wjdx2Y37A" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCmcqSvN5dAHPOY5zVsLUrOg" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCjr2bPAyPV7t35MvcgT3W8Q" youtube infosec)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCEp20NgOZHmgWdbQdHSxgjw" youtube retrotech)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCEbYhDd6c6vngsF5PQpFVWg" youtube functional prog)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCsnGwSIHyoYN0kiINAGUKxg" youtube linux)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCkMYR1Nerqm5U6LQZpayMhg" youtube music)
-                       ("https://www.youtube.com/feeds/videos.xml?channel_id=UCVbRGNXwrOMEZ1qzGBPf-ow" youtube music)
-                       ("https://www.reddit.com/r/osdev.rss" reddit prog))))
 #+END_SRC
 
 ** Mpv
@@ -490,4 +448,116 @@ int main(int argc, char *argv[])
   :hook (company-mode . company-box-mode))
 
 
+#+END_SRC
+
+** Dashboard
+#+BEGIN_SRC elisp
+(use-package dashboard
+  :ensure t
+  :config
+ (setq dashboard-set-heading-icons t)
+ (setq dashboard-set-file-icons t) 
+ (setq dashboard-set-init-info t)
+ (setq dashboard-set-footer nil)
+ (dashboard-setup-startup-hook))
+
+#+END_SRC
+** EXWM
+#+BEGIN_SRC elisp
+(defun kbd/exwm-update-class ()
+  (exwm-workspace-rename-buffer exwm-class-name))
+
+(defun kbd/bg-run(command)
+  (let ((command-parts (split-string command "[ ]+")))
+    (apply #'call-process `(,(car command-parts) nil 0 nil ,@(cdr command-parts)))))
+
+(defun kbd/exwm-update-title ()
+  (pcase exwm-class-name
+    ("Firefox" (exwm-workspace-rename-buffer (format "Firefox: %s" exwm-title)))))
+
+(defun kbd/configure-window-by-class ()
+  (interactive)
+  (pcase exwm-class-name
+    ("discord" (exwm-workspace-move-window 9))))
+
+(use-package exwm
+  :ensure t
+  :config 
+  (setq exwm-workspace-number 10)
+  (add-hook 'exwm-update-class-hook #'kbd/exwm-update-class)
+  (add-hook 'exwm-update-title-hook #'kbd/exwm-update-title)
+  (add-hook 'exwm-manage-finish-hook #'kbd/configure-window-by-class)
+
+  (setq exwm-layout-show-all-buffers t)
+  (setq exwm-workspace-show-all-buffers t)
+  
+  (require 'exwm-systemtray)
+  (exwm-systemtray-enable)
+
+  (setq exwm-input-prefix-keys
+        '(?\C-x
+          ?\C-h
+          ?\C-w
+          ?\s-
+          ?\M-x))
+
+  (define-key exwm-mode-map [?\C-q] 'exwm-input-send-next-key)
+  (setq exwm-input-global-keys
+        `(
+          ;; Reset to line-mode (C-c C-k switches to char-mode via exwm-input-release-keyboard)
+          ([?\s-r] . exwm-reset)
+          
+          ;; Move between windows
+          ([s-left] . windmove-left)
+          ([s-right] . windmove-right)
+          ([s-up] . windmove-up)
+          ([s-down] . windmove-down)
+          
+          ;; Launch applications via shell command
+          ([?\s-&] . (lambda (command)
+                       (interactive (list (read-shell-command "$ ")))
+                       (start-process-shell-command command nil command)))
+          
+          ;; Switch workspace
+          ([?\s-w] . exwm-workspace-switch)
+          
+          ;; 's-N': Switch to certain workspace with Super (Win) plus a number key (0 - 9)
+          ,@(mapcar (lambda (i)
+                      `(,(kbd (format "s-%d" i)) .
+                        (lambda ()
+                          (interactive)
+                          (exwm-workspace-switch-create ,i))))
+                    (number-sequence 0 9))))
+
+  (exwm-input-set-key (kbd "s-d") 'counsel-linux-app) 
+  (exwm-input-set-key (kbd "s-f") 'exwm-layout-toggle-fullscreen)
+  (exwm-enable))
+
+(use-package desktop-environment
+  :after exwm
+  :config (desktop-environment-mode)
+  :custom
+  (desktop-environment-brightness-small-increment "2%+")
+  (desktop-environment-brightness-small-decrement "2%-")
+  (desktop-environment-brightness-normal-increment "5%+")
+  (desktop-environment-brightness-normal-decrement "5%-"))
+#+END_SRC
+
+** Tweak some bindings
+#+BEGIN_SRC elisp
+
+(defun kill-buffer-and-quit ()
+  (kill-current-buffer)
+  (evil-delete-buffer))
+
+(global-set-key (kbd "s-h") 'split-window-right)
+(global-set-key (kbd "s-v") 'split-window-below)
+(global-set-key (kbd "s-q") 'evil-delete-buffer)
+(defalias 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+
+** Rainbow Delimiters
+#+BEGIN_SRC elisp
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
 #+END_SRC
